@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>CKEditor 5</title>
+  <script src="/js/ckeditor.js"></script>
+  <link rel="stylesheet" href="/css/tailwind.css">
+  <link rel="stylesheet" href="/css/ckeditor.css">
+</head>
+<body class="antialiased overflow-x-hidden">
+  <div class="px-1.5 py-2">
+    <input class="block w-full text-lg text-gray-800 font-normal px-1.5 py-2 placeholder-gray-500 border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600" placeholder="Note Title" />
+  </div>
+  <textarea id="editor" placeholder="Start writing..."></textarea>
+
+  <script>
+    const editorConfig = {
+      removePlugins: ['Autoformat'],
+      fontColor: {
+        colors: [
+          { color: 'rgb(31, 41, 55)', label: 'Black' },
+          { color: 'rgb(107, 114, 128)', label: 'Gray' },
+          { color: 'rgb(185, 28, 28)', label: 'Red' },
+          { color: 'rgb(252, 211, 77)', label: 'Yellow' },
+          { color: 'rgb(217, 119, 6)', label: 'Orange' },
+          { color: 'rgb(120, 53, 15)', label: 'Brown' },
+          { color: 'rgb(21, 128, 61)', label: 'Green' },
+          { color: 'rgb(29, 78, 216)', label: 'Blue' },
+          { color: 'rgb(91, 33, 182)', label: 'Purple' },
+          { color: 'rgb(219, 39, 119)', label: 'Pink' },
+          { color: 'rgb(229, 231, 235)', label: 'Light gray' },
+          { color: 'rgb(255, 255, 255)', label: 'White', hasBorder: true },
+        ],
+        columns: 6,
+      },
+      fontBackgroundColor: {
+        colors: [
+          { color: 'rgb(31, 41, 55)', label: 'Black' },
+          { color: 'rgb(107, 114, 128)', label: 'Gray' },
+          { color: 'rgb(239, 68, 68)', label: 'Red' },
+          { color: 'rgb(252, 211, 77)', label: 'Yellow' },
+          { color: 'rgb(245, 158, 11)', label: 'Orange' },
+          { color: 'rgb(180, 83, 9)', label: 'Brown' },
+          { color: 'rgb(74, 222, 128)', label: 'Green' },
+          { color: 'rgb(147, 197, 253)', label: 'Blue' },
+          { color: 'rgb(196, 181, 253)', label: 'Purple' },
+          { color: 'rgb(251, 207, 232)', label: 'Pink' },
+          { color: 'rgb(229, 231, 235)', label: 'Light gray' },
+          { color: 'rgb(255, 255, 255)', label: 'White', hasBorder: true },
+        ],
+        columns: 6,
+      },
+    };
+
+    ClassicEditor.create(document.querySelector('#editor'), editorConfig)
+      .then( editor => {
+        window.editor = editor;
+      })
+      .catch( error => {
+        console.error('There was a problem initializing the editor.', error);
+      });
+  </script>
+</body>
+</html>
