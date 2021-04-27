@@ -55,28 +55,28 @@
 
     ClassicEditor.create(document.querySelector('#bodyInput'), editorConfig)
       .then(editor => {
-        window.editor = editor;
-
         if (window.ReactNativeWebView) {
-          document.querySelector('#titleInput').addEventListener('input', (e) => {
-            window.ReactNativeWebView.postMessage('data:title:' + e.target.value);
-          });
-          editor.model.document.on('change:data', () => {
-            window.ReactNativeWebView.postMessage('data:body:' + editor.getData());
-          });
-
           const onFocusChange = () => {
             setTimeout(() => {
               const isBodyFocused = editor.editing.view.document.isFocused;
-              const isFocused = document.hasFocus() || isBodyFocused ? 'true' : 'false';
-              window.ReactNativeWebView.postMessage('focus:webView:' + isFocused);
+              if (document.hasFocus() || isBodyFocused) {
+                window.ReactNativeWebView.postMessage('focus:webView:true');
+              }
             }, 1);
           };
           document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
-          document.querySelector('#titleInput').addEventListener('blur', onFocusChange);
           editor.editing.view.document.on('change:isFocused', onFocusChange);
 
-          window.ReactNativeWebView.postMessage('data:isEditorReady:true');
+          const getData = () => {
+            const SEP = '_jUSTnOTE-sEpArAtOr_';
+            const title = document.querySelector('#titleInput').value;
+            const body = editor.getData();
+            window.ReactNativeWebView.postMessage('data:webView:' + title + SEP + body);
+          };
+
+          window.editor = editor;
+          window.justnote = { getData };
+          window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
       })
       .catch( error => {

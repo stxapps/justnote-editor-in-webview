@@ -895,10 +895,6 @@ select {
   width: 100%;
 }
 
-.blur {
-  --tw-blur: blur(8px);
-}
-
 @media (min-width: 640px) {
 }
 
