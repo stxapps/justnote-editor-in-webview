@@ -121,6 +121,10 @@ ol {
   padding-left: 40px;
 }
 
+input:disabled {
+  background-color: var(--white);
+}
+
 .ck.ck-editor__main>.ck-editor__editable {
   color: var(--gray-800);
   font-size: 16px;
@@ -153,4 +157,8 @@ ol {
 
 .ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
   box-shadow: none;
+}
+
+.ck.ck-button.ck-disabled .ck-button__icon, a.ck.ck-button.ck-disabled .ck-button__icon {
+  opacity: 1;
 }

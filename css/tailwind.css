@@ -833,14 +833,19 @@ select {
   overflow-x: hidden;
 }
 
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
 .px-1 {
   padding-left: 0.25rem;
   padding-right: 0.25rem;
 }
 
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+.py-1\.5 {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
 }
 
 .px-1\.5 {
@@ -888,6 +893,10 @@ select {
 
 .w-full {
   width: 100%;
+}
+
+.blur {
+  --tw-blur: blur(8px);
 }
 
 @media (min-width: 640px) {

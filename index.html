@@ -9,10 +9,10 @@
   <link rel="stylesheet" href="/css/ckeditor.css">
 </head>
 <body class="antialiased overflow-x-hidden">
-  <div class="px-1.5 py-2">
-    <input class="block w-full text-lg text-gray-800 font-normal px-1.5 py-2 placeholder-gray-500 border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600" placeholder="Note Title" />
+  <div class="px-1.5 py-1.5">
+    <input id="titleInput" class="block w-full text-lg text-gray-800 font-normal px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600" placeholder="Note Title" />
   </div>
-  <textarea id="editor" placeholder="Start writing..."></textarea>
+  <textarea id="bodyInput" placeholder="Start writing..."></textarea>
 
   <script>
     const editorConfig = {
@@ -53,9 +53,31 @@
       },
     };
 
-    ClassicEditor.create(document.querySelector('#editor'), editorConfig)
-      .then( editor => {
+    ClassicEditor.create(document.querySelector('#bodyInput'), editorConfig)
+      .then(editor => {
         window.editor = editor;
+
+        if (window.ReactNativeWebView) {
+          document.querySelector('#titleInput').addEventListener('input', (e) => {
+            window.ReactNativeWebView.postMessage('data:title:' + e.target.value);
+          });
+          editor.model.document.on('change:data', () => {
+            window.ReactNativeWebView.postMessage('data:body:' + editor.getData());
+          });
+
+          const onFocusChange = () => {
+            setTimeout(() => {
+              const isBodyFocused = editor.editing.view.document.isFocused;
+              const isFocused = document.hasFocus() || isBodyFocused ? 'true' : 'false';
+              window.ReactNativeWebView.postMessage('focus:webView:' + isFocused);
+            }, 1);
+          };
+          document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
+          document.querySelector('#titleInput').addEventListener('blur', onFocusChange);
+          editor.editing.view.document.on('change:isFocused', onFocusChange);
+
+          window.ReactNativeWebView.postMessage('data:isEditorReady:true');
+        }
       })
       .catch( error => {
         console.error('There was a problem initializing the editor.', error);
