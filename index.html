@@ -10,9 +10,9 @@
 </head>
 <body class="antialiased overflow-x-hidden">
   <div class="px-1.5 py-1.5">
-    <input id="titleInput" class="block w-full text-lg text-gray-800 font-normal px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600" placeholder="Note Title" />
+    <input type="text" name="titleInput" id="titleInput" class="block w-full text-lg text-gray-800 font-normal px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0" placeholder="Note Title" autocomplete="off" />
   </div>
-  <textarea id="bodyInput" placeholder="Start writing..."></textarea>
+  <textarea name="bodyInput" id="bodyInput" placeholder="Start writing..."></textarea>
 
   <script>
     const editorConfig = {
