@@ -33,6 +33,7 @@
           { color: 'rgb(255, 255, 255)', label: 'White', hasBorder: true },
         ],
         columns: 6,
+        documentColors: 0,
       },
       fontBackgroundColor: {
         colors: [
@@ -50,11 +51,69 @@
           { color: 'rgb(255, 255, 255)', label: 'White', hasBorder: true },
         ],
         columns: 6,
+        documentColors: 0,
       },
     };
 
     ClassicEditor.create(document.querySelector('#bodyInput'), editorConfig)
       .then(editor => {
+
+        const panel = document.querySelector('.ck.ck-sticky-panel__content');
+
+        editor.editing.view.document.on('click', () => {
+          const domSelection = window.getSelection();
+          console.log(`isCollapsed: ${domSelection.isCollapsed}`)
+          if (domSelection && !domSelection.isCollapsed) {
+            let marginBottom = 0;
+            if (panel.style.marginBottom) {
+              marginBottom = parseInt(panel.style.marginBottom.slice(0, -2), 10);
+            }
+
+            const anchorElement = domSelection.anchorNode.parentElement;
+            const focusElement = domSelection.focusNode.parentElement;
+            const anchorTop = anchorElement.getBoundingClientRect().top;
+            const focusTop = focusElement.getBoundingClientRect().top;
+            const top = Math.min(anchorTop, focusTop) - marginBottom;
+
+            const topHeight = 52 + 40;
+            const toolbarHeight = 100;
+
+            console.log(`top: ${top}, height: ${topHeight + toolbarHeight}`);
+            if (top < topHeight + toolbarHeight) {
+              panel.style.marginBottom = (topHeight + toolbarHeight - top) + 'px';
+              console.log(`set and return`);
+              return;
+            }
+          }
+
+          console.log(`reset to zero`);
+          panel.style.marginBottom = 0;
+        });
+
+        editor.editing.view.document.on('selectionChangeDone', (_, { domSelection }) => {
+          if (domSelection.isCollapsed) panel.style.marginBottom = 0;
+        });
+
+        editor.editing.view.document.on('change:isFocused', () => {
+          if (!editor.editing.view.document.isFocused) panel.style.marginBottom = 0;
+        });
+
+        const onDropdownOpenChange = (i) => {
+          console.log(i);
+          const dropdown = editor.ui.view.toolbar.items.get(i);
+          if (dropdown.isOpen) {
+            console.log('open')
+            return;
+          }
+
+          console.log('close')
+        }
+
+        const toolbarItems = editor.ui.view.toolbar.items;
+        toolbarItems.get(3).on('change:isOpen', () => onDropdownOpenChange(3));
+        toolbarItems.get(4).on('change:isOpen', () => onDropdownOpenChange(4));
+        toolbarItems.get(5).on('change:isOpen', () => onDropdownOpenChange(5));
+
         if (window.ReactNativeWebView) {
           const onFocusChange = () => {
             setTimeout(() => {
@@ -74,10 +133,11 @@
             window.ReactNativeWebView.postMessage('data:webView:' + title + SEP + body);
           };
 
-          window.editor = editor;
           window.justnote = { getData };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
+
+        window.editor = editor;
       })
       .catch( error => {
         console.error('There was a problem initializing the editor.', error);

@@ -156,3 +156,16 @@
 .ck.ck-button.ck-disabled .ck-button__icon, a.ck.ck-button.ck-disabled .ck-button__icon {
   opacity: 1;
 }
+
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-dropdown__panel.ck-dropdown__panel_sme {
+  max-width: none;
+}
+
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list {
+  display: flex;
+  flex-direction: row;
+}
+
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-list .ck.ck-list__item {
+  min-width: auto;
+}
