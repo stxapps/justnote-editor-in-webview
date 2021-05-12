@@ -8,14 +8,27 @@
   <link rel="stylesheet" href="/css/tailwind.css">
   <link rel="stylesheet" href="/css/ckeditor.css">
 </head>
-<body class="antialiased overflow-x-hidden">
-  <div class="px-1.5 py-1.5">
-    <input type="text" name="titleInput" id="titleInput" class="block w-full text-lg text-gray-800 font-normal px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0" placeholder="Note Title" autocomplete="off" />
+<body class="antialiased">
+  <div id="main" class="flex flex-col overflow-hidden">
+    <div class="flex-grow flex-shrink overflow-x-hidden overflow-y-auto">
+      <div class="px-1.5 py-1.5 border-b border-gray-200">
+        <input type="text" name="titleInput" id="titleInput" class="block w-full text-lg text-gray-800 font-normal px-1.5 py-1.5 placeholder-gray-500 border-0 focus:outline-none focus:ring-0" placeholder="Note Title" autocomplete="off" />
+      </div>
+      <div id="bodyInput"></div>
+      <div class="h-28"></div>
+    </div>
+    <div id="bodyToolbar" class="flex-grow-0 flex-shrink-0"></div>
   </div>
-  <textarea name="bodyInput" id="bodyInput" placeholder="Start writing..."></textarea>
 
   <script>
+    const main = document.querySelector('#main');
+    window.addEventListener('resize', () => {
+      main.style.height = window.innerHeight + 'px';
+    });
+    main.style.height = window.innerHeight + 'px';
+
     const editorConfig = {
+      placeholder: 'Start writing...',
       removePlugins: ['Autoformat'],
       fontColor: {
         colors: [
@@ -55,64 +68,13 @@
       },
     };
 
-    ClassicEditor.create(document.querySelector('#bodyInput'), editorConfig)
+    DecoupledEditor.create(document.querySelector('#bodyInput'), editorConfig)
       .then(editor => {
+        const bodyToolbar = document.querySelector('#bodyToolbar');
+        bodyToolbar.appendChild(editor.ui.view.toolbar.element);
 
-        const panel = document.querySelector('.ck.ck-sticky-panel__content');
-
-        editor.editing.view.document.on('click', () => {
-          const domSelection = window.getSelection();
-          console.log(`isCollapsed: ${domSelection.isCollapsed}`)
-          if (domSelection && !domSelection.isCollapsed) {
-            let marginBottom = 0;
-            if (panel.style.marginBottom) {
-              marginBottom = parseInt(panel.style.marginBottom.slice(0, -2), 10);
-            }
-
-            const anchorElement = domSelection.anchorNode.parentElement;
-            const focusElement = domSelection.focusNode.parentElement;
-            const anchorTop = anchorElement.getBoundingClientRect().top;
-            const focusTop = focusElement.getBoundingClientRect().top;
-            const top = Math.min(anchorTop, focusTop) - marginBottom;
-
-            const topHeight = 52 + 40;
-            const toolbarHeight = 100;
-
-            console.log(`top: ${top}, height: ${topHeight + toolbarHeight}`);
-            if (top < topHeight + toolbarHeight) {
-              panel.style.marginBottom = (topHeight + toolbarHeight - top) + 'px';
-              console.log(`set and return`);
-              return;
-            }
-          }
-
-          console.log(`reset to zero`);
-          panel.style.marginBottom = 0;
-        });
-
-        editor.editing.view.document.on('selectionChangeDone', (_, { domSelection }) => {
-          if (domSelection.isCollapsed) panel.style.marginBottom = 0;
-        });
-
-        editor.editing.view.document.on('change:isFocused', () => {
-          if (!editor.editing.view.document.isFocused) panel.style.marginBottom = 0;
-        });
-
-        const onDropdownOpenChange = (i) => {
-          console.log(i);
-          const dropdown = editor.ui.view.toolbar.items.get(i);
-          if (dropdown.isOpen) {
-            console.log('open')
-            return;
-          }
-
-          console.log('close')
-        }
-
-        const toolbarItems = editor.ui.view.toolbar.items;
-        toolbarItems.get(3).on('change:isOpen', () => onDropdownOpenChange(3));
-        toolbarItems.get(4).on('change:isOpen', () => onDropdownOpenChange(4));
-        toolbarItems.get(5).on('change:isOpen', () => onDropdownOpenChange(5));
+        const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+        if (groupedItemsDropdown) groupedItemsDropdown.panelPosition = 'nw';
 
         if (window.ReactNativeWebView) {
           const onFocusChange = () => {

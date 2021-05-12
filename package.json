@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "copy-ckeditor": "rm -rf ./js/* && cp -r ../ckeditor5/packages/ckeditor5-build-classic/build/* ./js",
+    "copy-ckeditor": "rm -rf ./js/* && cp -r ../ckeditor5/packages/ckeditor5-build-decoupled-document/build/* ./js",
     "build-css-dev": "postcss tailwind.css -o css/tailwind.css",
     "build-css": "postcss tailwind.css -o css/tailwind.css --env production",
     "start": "live-server --ignore=node_modules,.git --no-browser"

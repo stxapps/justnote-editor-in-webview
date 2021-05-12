@@ -804,20 +804,57 @@ select {
          url("https://justnote.cc/static/media/Inter-BlackItalic.c769882b.woff") format("woff");
 }
 
+.border-gray-200 {
+  --tw-border-opacity: 1;
+  border-color: rgba(229, 231, 235, var(--tw-border-opacity));
+}
+
 .border-0 {
   border-width: 0px;
+}
+
+.border-b {
+  border-bottom-width: 1px;
 }
 
 .block {
   display: block;
 }
 
+.flex {
+  display: flex;
+}
+
 .table {
   display: table;
 }
 
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-grow-0 {
+  flex-grow: 0;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.flex-shrink {
+  flex-shrink: 1;
+}
+
 .font-normal {
   font-weight: 400;
+}
+
+.h-28 {
+  height: 7rem;
 }
 
 .text-lg {
@@ -828,6 +865,14 @@ select {
 .focus\:outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
 }
 
 .overflow-x-hidden {
@@ -867,6 +912,10 @@ select {
 .placeholder-gray-500::placeholder {
   --tw-placeholder-opacity: 1;
   color: rgba(107, 114, 128, var(--tw-placeholder-opacity));
+}
+
+.resize {
+  resize: both;
 }
 
 * {

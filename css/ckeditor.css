@@ -107,33 +107,35 @@
   --ck-color-link-fake-selection: var(--jn-editor-blue-300);
 
   --ck-color-widget-hover-border: var(--jn-editor-green-600);
+
+  --ck-font-size-base: 15px;
 }
 
-.ck.ck-editor__main>.ck-editor__editable {
+.ck.ck-editor__editable {
   color: var(--jn-editor-gray-800);
   font-size: 16px;
 }
 
-.ck.ck-editor__main>.ck-editor__editable ul {
+.ck.ck-editor__editable ul {
   list-style: disc;
   padding-left: 40px;
 }
 
-.ck.ck-editor__main>.ck-editor__editable ol {
+.ck.ck-editor__editable ol {
   list-style: decimal;
   padding-left: 40px;
 }
 
-.ck.ck-editor__main>.ck-editor__editable p a {
+.ck.ck-editor__editable p a {
   color: var(--jn-editor-blue-700);
   cursor: pointer;
 }
 
-.ck.ck-editor__main>.ck-editor__editable p a:hover {
+.ck.ck-editor__editable p a:hover {
   text-decoration: underline;
 }
 
-.ck.ck-editor__main>.ck-editor__editable:not(.ck-focused) {
+.ck.ck-editor__editable:not(.ck-focused) {
   border-color: transparent;
 }
 
@@ -142,22 +144,18 @@
   box-shadow: none;
 }
 
-.ck.ck-editor__top .ck-sticky-panel .ck-toolbar {
+.ck.ck-toolbar {
   border-top-width: 1px;
   border-bottom-width: 1px;
   border-left-width: 0px;
   border-right-width: 0px;
 }
 
-.ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
-  box-shadow: none;
-}
-
 .ck.ck-button.ck-disabled .ck-button__icon, a.ck.ck-button.ck-disabled .ck-button__icon {
   opacity: 1;
 }
 
-.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-dropdown__panel.ck-dropdown__panel_sme {
+.ck.ck-dropdown.ck-font-size-dropdown .ck.ck-dropdown__panel {
   max-width: none;
 }
 
