@@ -23,7 +23,18 @@
   <script>
     const main = document.querySelector('#main');
     window.addEventListener('resize', () => {
+      // github.com/react-native-webview/react-native-webview/issues/154
+      // Sometimes it fires too early and height is not finalized.
       main.style.height = window.innerHeight + 'px';
+      setTimeout(() => {
+        main.style.height = window.innerHeight + 'px';
+      }, 1);
+      setTimeout(() => {
+        main.style.height = window.innerHeight + 'px';
+      }, 100);
+      setTimeout(() => {
+        main.style.height = window.innerHeight + 'px';
+      }, 250);
     });
     main.style.height = window.innerHeight + 'px';
 
@@ -75,6 +86,11 @@
 
         const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
         if (groupedItemsDropdown) groupedItemsDropdown.panelPosition = 'nw';
+
+        const toolbarItems = editor.ui.view.toolbar.items;
+        toolbarItems.get(3).panelPosition = 'nme';
+        toolbarItems.get(4).panelPosition = 'nme';
+        toolbarItems.get(5).panelPosition = 'nmw';
 
         if (window.ReactNativeWebView) {
           const onFocusChange = () => {
