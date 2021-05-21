@@ -95,8 +95,11 @@
         if (window.ReactNativeWebView) {
           const onFocusChange = () => {
             setTimeout(() => {
+              const titleInput = document.querySelector('#titleInput');
+              const isTitleFocused = titleInput === document.activeElement;
               const isBodyFocused = editor.editing.view.document.isFocused;
-              if (document.hasFocus() || isBodyFocused) {
+
+              if (isTitleFocused || isBodyFocused) {
                 window.ReactNativeWebView.postMessage('focus:webView:true');
               }
             }, 1);
