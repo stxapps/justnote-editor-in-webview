@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>CKEditor 5</title>
+  <script src="/core-js/minified.js"></script>
   <script src="/js/ckeditor.js"></script>
   <link rel="stylesheet" href="/css/tailwind.css">
   <link rel="stylesheet" href="/css/ckeditor.css">
@@ -107,14 +108,76 @@
           document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
           editor.editing.view.document.on('change:isFocused', onFocusChange);
 
+          let noteMedia = [];
+          let objectUrlNames = {};
+
+          const clearNoteMedia = () => {
+            noteMedia = [];
+
+            if (window.CKEditorObjectUrlContents) {
+              for (const objectUrl in window.CKEditorObjectUrlContents) {
+                URL.revokeObjectURL(objectUrl);
+              }
+            }
+            window.CKEditorObjectUrlContents = {};
+            objectUrlNames = {};
+          };
+
+          const addNoteMedia = (name, content) => {
+            noteMedia.push({ name, content });
+          };
+
+          const base64ToFile = async (name, content) => {
+            const res = await fetch(content);
+            const blob = await res.blob();
+            return new File([blob], name);
+          };
+
+          const setData = async (title, body) => {
+            document.querySelector('#titleInput').value = title;
+
+            const media = await Promise.all(noteMedia.map(async ({ name, content }) => {
+              const file = await base64ToFile(name, content);
+              return { name, content, file };
+            }));
+
+            for (const { name, content, file } of media) {
+              const objectUrl = URL.createObjectURL(file);
+
+              window.CKEditorObjectUrlContents[objectUrl] = { fname: name, content };
+              objectUrlNames[objectUrl] = name;
+
+              body = body.replaceAll(name, objectUrl);
+            }
+
+            editor.setData(body);
+          };
+
           const getData = () => {
             const SEP = '_jUSTnOTE-sEpArAtOr_';
+
+            window.ReactNativeWebView.postMessage('clear:objectUrlContents:true');
+            if (window.CKEditorObjectUrlContents) {
+              for (const [k, v] of Object.entries(window.CKEditorObjectUrlContents)) {
+                window.ReactNativeWebView.postMessage(
+                  'add:objectUrlContents:' + k + SEP + v.fname + SEP + v.content
+                );
+              }
+            }
+
+            window.ReactNativeWebView.postMessage('clear:objectUrlNames:true');
+            for (const [k, v] of Object.entries(objectUrlNames)) {
+              window.ReactNativeWebView.postMessage(
+                'add:objectUrlNames:' + k + SEP + v
+              );
+            }
+
             const title = document.querySelector('#titleInput').value;
             const body = editor.getData();
             window.ReactNativeWebView.postMessage('data:webView:' + title + SEP + body);
           };
 
-          window.justnote = { getData };
+          window.justnote = { clearNoteMedia, addNoteMedia, setData, getData };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
 
