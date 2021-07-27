@@ -108,6 +108,10 @@
           document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
           editor.editing.view.document.on('change:isFocused', onFocusChange);
 
+          const setTitle = (title) => {
+            document.querySelector('#titleInput').value = title;
+          };
+
           let noteMedia = [];
           let objectUrlNames = {};
 
@@ -133,9 +137,7 @@
             return new File([blob], name);
           };
 
-          const setData = async (title, body) => {
-            document.querySelector('#titleInput').value = title;
-
+          const setBody = async (body) => {
             const media = await Promise.all(noteMedia.map(async ({ name, content }) => {
               const file = await base64ToFile(name, content);
               return { name, content, file };
@@ -177,7 +179,7 @@
             window.ReactNativeWebView.postMessage('data:webView:' + title + SEP + body);
           };
 
-          window.justnote = { clearNoteMedia, addNoteMedia, setData, getData };
+          window.justnote = { setTitle, clearNoteMedia, addNoteMedia, setBody, getData };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
 
