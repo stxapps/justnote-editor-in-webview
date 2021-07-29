@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="/css/tailwind.css">
   <link rel="stylesheet" href="/css/ckeditor.css">
 </head>
-<body class="antialiased">
+<body class="antialiased overflow-hidden">
   <div id="main" class="flex flex-col overflow-hidden">
     <div class="flex-grow flex-shrink overflow-x-hidden overflow-y-auto">
       <div class="px-1.5 py-1.5 border-b border-gray-200">
@@ -92,6 +92,9 @@
         toolbarItems.get(3).panelPosition = 'nme';
         toolbarItems.get(4).panelPosition = 'nme';
         toolbarItems.get(5).panelPosition = 'nmw';
+        toolbarItems.get(8).on('done', () => {
+          if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
+        });
 
         if (window.ReactNativeWebView) {
           const onFocusChange = () => {
@@ -131,20 +134,27 @@
             noteMedia.push({ name, content });
           };
 
-          const base64ToFile = async (name, content) => {
+          const isString = (val) => {
+            return typeof val === 'string' || val instanceof String;
+          };
+
+          const dataUrlToBlob = async (content) => {
             const res = await fetch(content);
             const blob = await res.blob();
-            return new File([blob], name);
+            return blob;
           };
 
           const setBody = async (body) => {
-            const media = await Promise.all(noteMedia.map(async ({ name, content }) => {
-              const file = await base64ToFile(name, content);
-              return { name, content, file };
+            const _media = noteMedia.filter(({ content }) => {
+              return isString(content) && content.startsWith('data:');
+            });
+            const media = await Promise.all(_media.map(async ({ name, content }) => {
+              const blob = await dataUrlToBlob(content);
+              return { name, content, blob };
             }));
 
-            for (const { name, content, file } of media) {
-              const objectUrl = URL.createObjectURL(file);
+            for (const { name, content, blob } of media) {
+              const objectUrl = URL.createObjectURL(blob);
 
               window.CKEditorObjectUrlContents[objectUrl] = { fname: name, content };
               objectUrlNames[objectUrl] = name;
