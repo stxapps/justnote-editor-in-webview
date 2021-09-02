@@ -97,6 +97,8 @@
         });
 
         if (window.ReactNativeWebView) {
+          const SEP = '_jUSTnOTE-sEpArAtOr_';
+
           const onFocusChange = () => {
             setTimeout(() => {
               const titleInput = document.querySelector('#titleInput');
@@ -111,22 +113,27 @@
           document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
           editor.editing.view.document.on('change:isFocused', onFocusChange);
 
+          let dir;
+
+          const setDir = (_dir) => {
+            dir = _dir
+          };
+
           const setTitle = (title) => {
             document.querySelector('#titleInput').value = title;
           };
 
           let noteMedia = [];
+          let objectUrlContents = {};
           let objectUrlNames = {};
 
           const clearNoteMedia = () => {
             noteMedia = [];
 
-            if (window.CKEditorObjectUrlContents) {
-              for (const objectUrl in window.CKEditorObjectUrlContents) {
-                URL.revokeObjectURL(objectUrl);
-              }
+            for (const objectUrl in objectUrlContents) {
+              URL.revokeObjectURL(objectUrl);
             }
-            window.CKEditorObjectUrlContents = {};
+            objectUrlContents = {};
             objectUrlNames = {};
           };
 
@@ -144,7 +151,7 @@
             return blob;
           };
 
-          const setBody = async (body) => {
+          const replaceWithContents = (body) => {
             const _media = noteMedia.filter(({ content }) => {
               return isString(content) && content.startsWith('data:');
             });
@@ -156,21 +163,45 @@
             for (const { name, content, blob } of media) {
               const objectUrl = URL.createObjectURL(blob);
 
-              window.CKEditorObjectUrlContents[objectUrl] = { fname: name, content };
+              objectUrlContents[objectUrl] = { fname: name, content };
               objectUrlNames[objectUrl] = name;
 
               body = body.replaceAll(name, objectUrl);
             }
 
+            return body;
+          };
+
+          const replaceWithFiles = (body) => {
+            window.ReactNativeWebView.postMessage('clear:objectUrlFiles:true');
+
+            const media = noteMedia.filter(({ content }) => {
+              return isString(content) && content.startsWith('file:');
+            });
+            for (const { name, content } of media) {
+              const fileUrl = content.replace('file://', dir + '/');
+
+              window.ReactNativeWebView.postMessage(
+                'include:objectUrlFiles:' + fileUrl + SEP + name + SEP + content
+              );
+              objectUrlNames[fileUrl] = name;
+
+              body = body.replaceAll(name, fileUrl);
+            }
+
+            return body;
+          };
+
+          const setBody = async (body) => {
+            body = replaceWithContents(body);
+            body = replaceWithFiles(body);
             editor.setData(body);
           };
 
           const getData = () => {
-            const SEP = '_jUSTnOTE-sEpArAtOr_';
-
             window.ReactNativeWebView.postMessage('clear:objectUrlContents:true');
-            if (window.CKEditorObjectUrlContents) {
-              for (const [k, v] of Object.entries(window.CKEditorObjectUrlContents)) {
+            if (objectUrlContents) {
+              for (const [k, v] of Object.entries(objectUrlContents)) {
                 window.ReactNativeWebView.postMessage(
                   'add:objectUrlContents:' + k + SEP + v.fname + SEP + v.content
                 );
@@ -189,7 +220,9 @@
             window.ReactNativeWebView.postMessage('data:webView:' + title + SEP + body);
           };
 
-          window.justnote = { setTitle, clearNoteMedia, addNoteMedia, setBody, getData };
+          window.justnote = {
+            setDir, setTitle, clearNoteMedia, addNoteMedia, setBody, getData,
+          };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
 
