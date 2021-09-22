@@ -182,7 +182,7 @@
               return isString(name) && name.startsWith('cdroot/');
             });
             for (const { name, content } of media) {
-              const fileUrl = name.replace('cdroot/', dir + '/');
+              const fileUrl = name.replace('cdroot/', 'file://' + dir + '/');
 
               window.ReactNativeWebView.postMessage(
                 'include:objectUrlFiles:' + fileUrl + SEP + name + SEP + content
