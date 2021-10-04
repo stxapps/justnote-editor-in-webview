@@ -115,6 +115,11 @@
           document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
           editor.editing.view.document.on('change:isFocused', onFocusChange);
 
+          const setScrollEnabled = (enabled) => {
+            const scrollView = document.querySelector('#scrollView');
+            scrollView.style.overflowY = enabled ? null : 'hidden';
+          };
+
           const scrollTo = (x, y) => {
             const scrollView = document.querySelector('#scrollView');
             scrollView.scrollTo(x, y);
@@ -229,8 +234,8 @@
           };
 
           window.justnote = {
-            scrollTo, setTitle, setDir, revokeObjectUrl, clearNoteMedia, addNoteMedia,
-            setBody, getData,
+            setScrollEnabled, scrollTo, setTitle, setDir, revokeObjectUrl,
+            clearNoteMedia, addNoteMedia, setBody, getData,
           };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
