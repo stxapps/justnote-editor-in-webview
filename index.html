@@ -24,6 +24,43 @@
   <!--   <ul><li><label><input type="checkbox" /></label><span></span></li></ul> -->
   <!-- End -->
   <script>
+    const throttle = (func, limit) => {
+      let lastFunc;
+      let lastRan;
+      return function () {
+        const context = this;
+        const args = arguments;
+        if (!lastRan) {
+          func.apply(context, args);
+          lastRan = Date.now();
+        } else {
+          clearTimeout(lastFunc);
+          lastFunc = setTimeout(function () {
+            if ((Date.now() - lastRan) >= limit) {
+              func.apply(context, args);
+              lastRan = Date.now();
+            }
+          }, limit - (Date.now() - lastRan));
+        }
+      };
+    };
+
+    const setToolbarGroupedItemsDropdownMaxWidth = () => {
+      if (!window.editor) return;
+
+      const editor = window.editor;
+      const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+      if (!groupedItemsDropdown) return;
+
+      if (window.innerWidth < 389) {
+        groupedItemsDropdown.toolbarView.maxWidth = '256px';
+      } else if (window.innerWidth < 428) {
+        groupedItemsDropdown.toolbarView.maxWidth = '218px';
+      } else {
+        groupedItemsDropdown.toolbarView.maxWidth = '';
+      }
+    };
+
     const main = document.querySelector('#main');
     window.addEventListener('resize', () => {
       // github.com/react-native-webview/react-native-webview/issues/154
@@ -40,6 +77,10 @@
       }, 250);
     });
     main.style.height = window.innerHeight + 'px';
+
+    window.addEventListener('resize', throttle(() => {
+      setToolbarGroupedItemsDropdownMaxWidth();
+    }, 16));
 
     const editorConfig = {
       placeholder: 'Start writing...',
@@ -91,8 +132,9 @@
         if (groupedItemsDropdown) groupedItemsDropdown.panelPosition = 'nw';
 
         const toolbarItems = editor.ui.view.toolbar.items;
+        toolbarItems.get(2).panelPosition = 'nme';
         toolbarItems.get(3).panelPosition = 'nme';
-        toolbarItems.get(4).panelPosition = 'nme';
+        toolbarItems.get(4).panelPosition = 'nmw';
         toolbarItems.get(5).panelPosition = 'nmw';
         toolbarItems.get(8).on('done', () => {
           if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
@@ -241,6 +283,7 @@
         }
 
         window.editor = editor;
+        setToolbarGroupedItemsDropdownMaxWidth();
       })
       .catch( error => {
         console.error('There was a problem initializing the editor.', error);
