@@ -45,6 +45,26 @@
       };
     };
 
+    const debounce = (func, wait, immediate) => {
+      let timeout;
+
+      return function () {
+        let context = this;
+        let args = arguments;
+
+        let later = function () {
+          timeout = null;
+          if (!immediate) func.apply(context, args);
+        };
+
+        let callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+
+        if (callNow) func.apply(context, args);
+      };
+    };
+
     const setToolbarGroupedItemsDropdownMaxWidth = () => {
       if (!window.editor) return;
 
@@ -274,6 +294,33 @@
             const body = editor.getData();
             window.ReactNativeWebView.postMessage('data:webView:' + title + SEP + body);
           };
+
+          // Need debounce for now to prevent calling editor.getData too often
+          // There is still performance issue about that.
+          // https://github.com/ckeditor/ckeditor5/issues/5812
+          const onDataChange = debounce(() => {
+            window.ReactNativeWebView.postMessage('clear:editingObjectUrlContents:true');
+            for (const [k, v] of Object.entries(objectUrlContents)) {
+              window.ReactNativeWebView.postMessage(
+                'add:editingObjectUrlContents:' + k + SEP + v.fname + SEP + v.content
+              );
+            }
+
+            window.ReactNativeWebView.postMessage('clear:editingObjectUrlNames:true');
+            for (const [k, v] of Object.entries(objectUrlNames)) {
+              window.ReactNativeWebView.postMessage(
+                'add:editingObjectUrlNames:' + k + SEP + v
+              );
+            }
+
+            const title = document.querySelector('#titleInput').value;
+            const body = editor.getData();
+            window.ReactNativeWebView.postMessage(
+              'editingData:webView:' + title + SEP + body
+            );
+          }, 1000);
+          document.querySelector('#titleInput').addEventListener('input', onDataChange);
+          editor.model.document.on('change:data', onDataChange);
 
           window.justnote = {
             setScrollEnabled, scrollTo, setTitle, setDir, revokeObjectUrl,
