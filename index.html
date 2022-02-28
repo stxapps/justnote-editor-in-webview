@@ -156,8 +156,11 @@
         toolbarItems.get(3).panelPosition = 'nme';
         toolbarItems.get(4).panelPosition = 'nmw';
         toolbarItems.get(5).panelPosition = 'nmw';
-        toolbarItems.get(8).on('done', () => {
+        toolbarItems.get(10).on('done', () => {
           if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage('focus:webView:true');
+          }
         });
 
         if (window.ReactNativeWebView) {
