@@ -20,6 +20,7 @@
     </div>
     <div id="bodyToolbar" class="flex-grow-0 flex-shrink-0"></div>
   </div>
+  <div id="maskView" class="fixed inset-0 bg-transparent hidden"></div>
   <!-- For TailwindCss -->
   <!--   <ul><li><label><input type="checkbox" /></label><span></span></li></ul> -->
   <!-- End -->
@@ -180,6 +181,11 @@
           document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
           editor.editing.view.document.on('change:isFocused', onFocusChange);
 
+          const setEditable = (editable) => {
+            const maskView = document.querySelector('#maskView');
+            maskView.style.display = editable ? 'none' : 'block';
+          };
+
           const setScrollEnabled = (enabled) => {
             const scrollView = document.querySelector('#scrollView');
             scrollView.style.overflowY = enabled ? null : 'hidden';
@@ -326,7 +332,7 @@
           editor.model.document.on('change:data', onDataChange);
 
           window.justnote = {
-            setScrollEnabled, scrollTo, setTitle, setDir, revokeObjectUrl,
+            setEditable, setScrollEnabled, scrollTo, setTitle, setDir, revokeObjectUrl,
             clearNoteMedia, addNoteMedia, setBody, getData,
           };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
