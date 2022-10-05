@@ -222,16 +222,16 @@
             else main.classList.remove('blk-mode');
 
             const titleView = document.querySelector('#titleView');
-            if (mode === 1) main.classList.add('blk:border-gray-700');
+            if (mode === 1) titleView.classList.add('blk:border-gray-700');
             else titleView.classList.remove('blk:border-gray-700');
 
             const titleInput = document.querySelector('#titleInput');
             if (mode === 1) {
-              titleView.classList.add(
+              titleInput.classList.add(
                 'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
               );
             } else {
-              titleView.classList.remove(
+              titleInput.classList.remove(
                 'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
               );
             }

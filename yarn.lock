@@ -882,10 +882,9 @@ lilconfig@^2.0.5, lilconfig@^2.0.6:
   resolved "https://registry.yarnpkg.com/lilconfig/-/lilconfig-2.0.6.tgz#32a384558bd58af3d4c6e077dd1ad1d397bc69d4"
   integrity sha512-9JROoBW7pobfsx+Sq2JsASvCo6Pfo6WWoUW79HuB1BCoBXD4PLWJPqDF6fNj67pqBYTbAHkE57M1kS/+L1neOg==
 
-live-server@^1.2.2:
+"live-server@git+https://github.com/tapio/live-server.git#ad22544":
   version "1.2.2"
-  resolved "https://registry.yarnpkg.com/live-server/-/live-server-1.2.2.tgz#20b4fe5c2ca886faa61813310e28680804f48dad"
-  integrity sha512-t28HXLjITRGoMSrCOv4eZ88viHaBVIjKjdI5PO92Vxlu+twbk6aE0t7dVIaz6ZWkjPilYFV6OSdMYl9ybN2B4w==
+  resolved "git+https://github.com/tapio/live-server.git#ad22544889298948f99a7f61315dcc56c6ca10e5"
   dependencies:
     chokidar "^2.0.4"
     colors "1.4.0"
