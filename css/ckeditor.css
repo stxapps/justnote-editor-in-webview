@@ -349,3 +349,9 @@
 .blk-mode .ck-content .todo-list .todo-list__label>input:before {
   border: 1px solid var(--jn-editor-gray-300);
 }
+
+@media (any-hover: none) {
+  .ck.ck-balloon-panel.ck-tooltip {
+    display: none;
+  }
+}
