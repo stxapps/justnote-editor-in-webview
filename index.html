@@ -134,6 +134,20 @@
     const editorConfig = {
       placeholder: 'Start writing...',
       removePlugins: ['Autoformat'],
+      fontSize: {
+        options: [
+          'tiny', 'small', 'default', 'big', 'huge',
+          { title: '9', model: '0.5625em' },
+          { title: '12', model: '0.75em' },
+          { title: '14', model: '0.875em' },
+          { title: '18', model: '1.125em' },
+          { title: '24', model: '1.5em' },
+          { title: '30', model: '1.875em' },
+          { title: '36', model: '2.25em' },
+          { title: '48', model: '3em' },
+          { title: '60', model: '3.75em' },
+        ],
+      },
       fontColor: {
         colors: [
           { color: 'rgb(31, 41, 55)', label: 'Black' },
@@ -237,6 +251,17 @@
             }
           };
           // semi-collon to end a function is important for export-ckeditor-as-string.js
+
+          const setEditorFontSizes = (doMoreEditorFontSizes) => {
+            const main = document.querySelector('#main');
+            if (doMoreEditorFontSizes) {
+              main.classList.add('more-font-sizes');
+              main.classList.remove('default-font-sizes');
+            } else {
+              main.classList.add('default-font-sizes');
+              main.classList.remove('more-font-sizes');
+            }
+          };
 
           const setEditable = (editable) => {
             const maskView = document.querySelector('#maskView');
@@ -389,8 +414,9 @@
           editor.model.document.on('change:data', onDataChange);
 
           window.justnote = {
-            setThemeMode, setEditable, setScrollEnabled, scrollTo, setTitle, setDir,
-            revokeObjectUrl, clearNoteMedia, addNoteMedia, setBody, getData,
+            setThemeMode, setEditorFontSizes, setEditable, setScrollEnabled, scrollTo,
+            setTitle, setDir, revokeObjectUrl, clearNoteMedia, addNoteMedia, setBody,
+            getData,
           };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
