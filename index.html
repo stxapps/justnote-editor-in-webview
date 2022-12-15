@@ -44,12 +44,12 @@
         <input type="text" name="titleInput" id="titleInput" class="block w-full border-0 bg-white px-1.5 py-1.5 text-xl font-normal text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-0 lg:text-lg" placeholder="Note Title" />
       </div>
       <div id="bodyInput"></div>
-      <div class="h-28"></div>
+      <div id="spaceView"></div>
     </div>
     <div id="bodyToolbar" class="flex-grow-0 flex-shrink-0"></div>
   </div>
   <div id="maskView" class="fixed inset-0 bg-transparent hidden"></div>
-  <!-- For TailwindCss -->
+  <!-- For Tailwind CSS -->
   <!--   <ul><li><label><input type="checkbox" /></label><span></span></li></ul> -->
   <!-- End -->
   <script>
@@ -260,6 +260,15 @@
             } else {
               main.classList.add('default-font-sizes');
               main.classList.remove('more-font-sizes');
+            }
+
+            const spaceView = document.querySelector('#spaceView');
+            if (doMoreEditorFontSizes) {
+              spaceView.classList.add('h-32');
+              spaceView.classList.remove('h-28');
+            } else {
+              spaceView.classList.add('h-28');
+              spaceView.classList.remove('h-32');
             }
           };
 
