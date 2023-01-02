@@ -144,6 +144,13 @@
           'overflow-y-scroll', 'overscroll-contain', 'hide-scrollbar',
         );
         overView.classList.remove('hidden');
+
+        setTimeout(() => {
+          if (window.pageYOffset > 0) {
+            // scrollTo 0 doesn't work, need scrollBy with big enough number.
+            window.scrollBy({ top: windowHeight * -1, behavior: 'smooth' });
+          }
+        }, 100);
       } else {
         containView.classList.remove(
           'overflow-y-scroll', 'overscroll-contain', 'hide-scrollbar',
