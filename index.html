@@ -108,28 +108,51 @@
       };
     };
 
-    const setMainHeight = (height, doRepeat = false) => {
-      // github.com/react-native-webview/react-native-webview/issues/154
-      // Sometimes it fires too early and height is not finalized.
+    const setMainHeight = (height) => {
+      if (height < 24) {
+        // prevent blink on iPad when height is 4, 10, and 684.
+        // 4 is when note is null and NoteEditor is off the screen.
+        // 10 is the midway.
+        return;
+      }
+
       const containView = document.querySelector('#containView');
       const main = document.querySelector('#main');
 
       containView.style.height = height + 'px';
       main.style.height = height + 'px';
+    };
+
+    const setMainWindowHeight = (doRepeat = false) => {
+      // github.com/react-native-webview/react-native-webview/issues/154
+      // Sometimes it fires too early and height is not finalized.
+      // Need to set height again later with height at that time!
+      setTimeout(() => {
+        setMainHeight(window.innerHeight);
+      }, 1);
 
       if (!doRepeat) return;
 
       setTimeout(() => {
-        containView.style.height = height + 'px';
-        main.style.height = height + 'px';
-      }, 1);
-      setTimeout(() => {
-        containView.style.height = height + 'px';
-        main.style.height = height + 'px';
+        setMainHeight(window.innerHeight);
       }, 100);
       setTimeout(() => {
-        containView.style.height = height + 'px';
-        main.style.height = height + 'px';
+        setMainHeight(window.innerHeight);
+      }, 250);
+    };
+
+    const setMainVisualHeight = (doRepeat = false) => {
+      setTimeout(() => {
+        setMainHeight(window.visualViewport.height);
+      }, 1);
+
+      if (!doRepeat) return;
+
+      setTimeout(() => {
+        setMainHeight(window.visualViewport.height);
+      }, 100);
+      setTimeout(() => {
+        setMainHeight(window.visualViewport.height);
       }, 250);
     };
 
@@ -176,18 +199,18 @@
     };
 
     if (window.visualViewport) {
-      setMainHeight(window.visualViewport.height, false);
+      setMainVisualHeight(true);
       window.visualViewport.addEventListener('resize', () => {
-        setMainHeight(window.visualViewport.height, true);
+        setMainVisualHeight(true);
       });
 
       window.visualViewport.addEventListener('resize', throttle(() => {
         setTimeout(preventScroll, 100);
       }, 16));
     } else {
-      setMainHeight(window.innerHeight, false);
+      setMainWindowHeight(true);
       window.addEventListener('resize', () => {
-        setMainHeight(window.innerHeight, true);
+        setMainWindowHeight(true);
       });
     }
     window.addEventListener('resize', throttle(() => {
