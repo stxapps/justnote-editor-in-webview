@@ -156,6 +156,31 @@
       }, 250);
     };
 
+    const _scrollWindowTop = () => {
+      // scrollTo 0 doesn't work, need scrollBy with big enough number.
+      window.scrollBy({ top: window.innerHeight * -1, behavior: 'smooth' });
+    };
+
+    const scrollWindowTop = () => {
+      setTimeout(() => {
+        if (window.pageYOffset > 0) {
+          _scrollWindowTop();
+        } else {
+          setTimeout(() => {
+            if (window.pageYOffset > 0) {
+              _scrollWindowTop();
+            } else {
+              setTimeout(() => {
+                if (window.pageYOffset > 0) {
+                  _scrollWindowTop();
+                }
+              }, 400);
+            }
+          }, 250);
+        }
+      }, 100);
+    };
+
     const preventScroll = () => {
       const safeAreaHeight = Math.round(window.visualViewport.height);
       const windowHeight = Math.round(window.innerHeight);
@@ -168,12 +193,7 @@
         );
         overView.classList.remove('hidden');
 
-        setTimeout(() => {
-          if (window.pageYOffset > 0) {
-            // scrollTo 0 doesn't work, need scrollBy with big enough number.
-            window.scrollBy({ top: windowHeight * -1, behavior: 'smooth' });
-          }
-        }, 100);
+        scrollWindowTop();
       } else {
         containView.classList.remove(
           'overflow-y-scroll', 'overscroll-contain', 'hide-scrollbar',
@@ -293,10 +313,20 @@
         toolbarItems.get(5).panelPosition = 'nmw';
         toolbarItems.get(10).on('done', () => {
           if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
+
+          scrollWindowTop();
           if (window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage('focus:webView:true');
           }
         });
+
+        const linkUi = editor.plugins.get('LinkUI');
+        if (linkUi) {
+          const urlInput = linkUi.formView.urlInputView;
+          urlInput.on('change:isFocused', (evt, data, isFocused) => {
+            if (isFocused) scrollWindowTop();
+          });
+        }
 
         if (window.ReactNativeWebView) {
           const SEP = '_jUSTnOTE-sEpArAtOr_';
@@ -308,6 +338,7 @@
               const isBodyFocused = editor.editing.view.document.isFocused;
 
               if (isTitleFocused || isBodyFocused) {
+                scrollWindowTop();
                 window.ReactNativeWebView.postMessage('focus:webView:true');
               }
             }, 1);
