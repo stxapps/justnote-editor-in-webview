@@ -346,6 +346,59 @@
           document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
           editor.editing.view.document.on('change:isFocused', onFocusChange);
 
+          const updateTitleInputThemeMode = (mode) => {
+            const titleInput = document.querySelector('#titleInput');
+
+            for (const className of titleInput.classList.values()) {
+              // If highlight, no need to update theme class names.
+              if (className.includes('yellow')) return;
+            }
+
+            if (mode === 1) {
+              titleInput.classList.add(
+                'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
+              );
+            } else {
+              titleInput.classList.remove(
+                'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
+              );
+            }
+          };
+
+          const updateTitleInputHighlight = (doHighlight) => {
+            const titleInput = document.querySelector('#titleInput');
+
+            let themeMode = 0;
+            for (const className of titleInput.classList.values()) {
+              if (className.startsWith('blk:')) {
+                themeMode = 1;
+                break;
+              }
+            }
+
+            if (doHighlight) {
+              titleInput.classList.remove(
+                'bg-white', 'text-gray-800', 'placeholder:text-gray-500',
+                'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
+              );
+              titleInput.classList.add(
+                'bg-yellow-300', 'text-gray-800', 'placeholder:text-gray-500'
+              );
+            } else {
+              titleInput.classList.remove(
+                'bg-yellow-300', 'text-gray-800', 'placeholder:text-gray-500'
+              );
+              titleInput.classList.add(
+                'bg-white', 'text-gray-800', 'placeholder:text-gray-500'
+              );
+              if (themeMode === 1) {
+                titleInput.classList.add(
+                  'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
+                );
+              }
+            }
+          };
+
           const setThemeMode = (mode) => {
             const body = document.querySelector('body');
             if (mode === 1) body.classList.add('blk:bg-gray-900');
@@ -362,16 +415,7 @@
             if (mode === 1) titleView.classList.add('blk:border-gray-700');
             else titleView.classList.remove('blk:border-gray-700');
 
-            const titleInput = document.querySelector('#titleInput');
-            if (mode === 1) {
-              titleInput.classList.add(
-                'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
-              );
-            } else {
-              titleInput.classList.remove(
-                'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
-              );
-            }
+            updateTitleInputThemeMode(mode);
           };
           // semi-collon to end a function is important for export-ckeditor-as-string.js
 
@@ -545,10 +589,22 @@
           document.querySelector('#titleInput').addEventListener('input', onDataChange);
           editor.model.document.on('change:data', onDataChange);
 
+          const setFind = (doHighlightTitle, searchString, matchCase) => {
+            updateTitleInputHighlight(doHighlightTitle);
+            editor.execute('find', searchString, { matchCase });
+          };
+
+          const clearFind = () => {
+            updateTitleInputHighlight(false);
+
+            const ui = editor.plugins.get('FindAndReplaceUI');
+            if (ui) ui.fire('searchReseted');
+          };
+
           window.justnote = {
             setThemeMode, setEditorFontSizes, setEditable, setScrollEnabled, scrollTo,
             setTitle, setDir, revokeObjectUrl, clearNoteMedia, addNoteMedia, setBody,
-            getData,
+            getData, setFind, clearFind,
           };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
