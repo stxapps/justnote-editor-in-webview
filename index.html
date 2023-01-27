@@ -310,6 +310,7 @@
     DecoupledEditor.create(document.querySelector('#bodyInput'), editorConfig)
       .then(editor => {
         const bodyToolbar = document.querySelector('#bodyToolbar');
+        while (bodyToolbar.firstChild) bodyToolbar.removeChild(bodyToolbar.firstChild);
         bodyToolbar.appendChild(editor.ui.view.toolbar.element);
 
         const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
