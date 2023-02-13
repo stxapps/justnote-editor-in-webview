@@ -560,7 +560,7 @@
               );
             }
 
-            const title = document.querySelector('#titleInput').value;
+            const title = document.querySelector('#titleInput').value.trimEnd();
             const body = editor.getData();
             window.ReactNativeWebView.postMessage('data:webView:' + title + SEP + body);
           };
@@ -583,7 +583,7 @@
               );
             }
 
-            const title = document.querySelector('#titleInput').value;
+            const title = document.querySelector('#titleInput').value.trimEnd();
             const body = editor.getData();
             window.ReactNativeWebView.postMessage(
               'editingData:webView:' + title + SEP + body
