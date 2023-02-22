@@ -80,6 +80,17 @@
       };
     };
 
+    const isIPadIPhoneIPod = () => {
+      const ua = navigator.userAgent;
+      if (/iPad|iPhone|iPod/.test(ua)) {
+        return true;
+      }
+      if (/Mac OS X/.test(ua) && /Safari/.test(ua) && !/Chrome/.test(ua) && !/Firefox/.test(ua)) {
+        return true;
+      }
+      return false;
+    };
+
     const setMainHeight = (height) => {
       if (height < 24) {
         // prevent blink on iPad when height is 4, 10, and 684.
@@ -128,6 +139,37 @@
       }, 250);
     };
 
+    const preventScroll = () => {
+      const safeAreaHeight = Math.round(window.visualViewport.height);
+      const windowHeight = Math.round(window.innerHeight);
+
+      const containView = document.querySelector('#containView');
+      const overView = document.querySelector('#overView');
+      if (safeAreaHeight < windowHeight) {
+        containView.classList.add(
+          'overflow-y-scroll', 'overscroll-contain', 'hide-scrollbar',
+        );
+        overView.classList.remove('hidden');
+      } else {
+        containView.classList.remove(
+          'overflow-y-scroll', 'overscroll-contain', 'hide-scrollbar',
+        );
+        overView.classList.add('hidden');
+      }
+    };
+
+    const getVisualViewPortOffsetTop = () => {
+      let offsetTop = 0;
+      if (
+        isObject(window) &&
+        isObject(window.visualViewport) &&
+        isNumber(window.visualViewport.offsetTop)
+      ) {
+        offsetTop = window.visualViewport.offsetTop;
+      }
+      return offsetTop;
+    };
+
     let _isScrollingWindowTop = false;
     const _scrollWindowTop = () => {
       // Prevent calling while scrolling i.e. change on both visual height and focus.
@@ -143,44 +185,69 @@
     };
 
     const scrollWindowTop = () => {
-      setTimeout(() => {
-        if (window.pageYOffset > 0) {
+        if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
           _scrollWindowTop();
         } else {
           setTimeout(() => {
-            if (window.pageYOffset > 0) {
+            if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
               _scrollWindowTop();
             } else {
               setTimeout(() => {
-                if (window.pageYOffset > 0) {
+                if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
                   _scrollWindowTop();
+                } else {
+                  setTimeout(() => {
+                    if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+                      _scrollWindowTop();
+                    }
+                  }, 400);
                 }
-              }, 400);
+              }, 300);
             }
           }, 250);
         }
+    };
+
+    let _isScrollingWindowIntoView = false;
+    const _scrollWindowIntoView = () => {
+      if (_isScrollingWindowIntoView) return;
+      _isScrollingWindowIntoView = true;
+
+      const topBar = document.querySelector('#titleView');
+      if (topBar) topBar.scrollIntoView({ block: 'start', behavior: 'smooth' });
+
+      setTimeout(() => {
+        _isScrollingWindowIntoView = false;
       }, 100);
     };
 
-    const preventScroll = () => {
-      const safeAreaHeight = Math.round(window.visualViewport.height);
-      const windowHeight = Math.round(window.innerHeight);
-
-      const containView = document.querySelector('#containView');
-      const overView = document.querySelector('#overView');
-      if (safeAreaHeight < windowHeight) {
-        containView.classList.add(
-          'overflow-y-scroll', 'overscroll-contain', 'hide-scrollbar',
-        );
-        overView.classList.remove('hidden');
-
-        scrollWindowTop();
+    const scrollWindowIntoView = () => {
+      if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+        _scrollWindowIntoView();
       } else {
-        containView.classList.remove(
-          'overflow-y-scroll', 'overscroll-contain', 'hide-scrollbar',
-        );
-        overView.classList.add('hidden');
+        setTimeout(() => {
+          if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+            _scrollWindowIntoView();
+          } else {
+            setTimeout(() => {
+              if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+                _scrollWindowIntoView();
+              } else {
+                setTimeout(() => {
+                  if (window.pageYOffset > 0 || getVisualViewPortOffsetTop() > 0) {
+                    _scrollWindowIntoView();
+                  }
+                }, 400);
+              }
+            }, 300);
+          }
+        }, 250);
       }
+    };
+
+    const scrollWindowTopOrIntoView = () => {
+      if (isIPadIPhoneIPod()) scrollWindowTop();
+      else scrollWindowIntoView();
     };
 
     const setToolbarGroupedItemsDropdownMaxWidth = () => {
@@ -206,10 +273,12 @@
       window.visualViewport.addEventListener('resize', () => {
         setMainVisualHeight(true);
       });
-
       window.visualViewport.addEventListener('resize', throttle(() => {
         setTimeout(preventScroll, 100);
       }, 16));
+
+      const scrollListener = debounce(() => scrollWindowTopOrIntoView(), 100);
+      window.visualViewport.addEventListener('scroll', scrollListener);
     } else {
       setMainWindowHeight(true);
       window.addEventListener('resize', () => {
@@ -295,8 +364,6 @@
         toolbarItems.get(5).panelPosition = 'nmw';
         toolbarItems.get(10).on('done', () => {
           if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
-
-          scrollWindowTop();
           if (window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage('focus:webView:true');
           }
@@ -305,10 +372,6 @@
         const linkUi = editor.plugins.get('LinkUI');
         if (linkUi) {
           const urlInput = linkUi.formView.urlInputView;
-          urlInput.on('change:isFocused', (evt, data, isFocused) => {
-            if (isFocused) scrollWindowTop();
-          });
-
           const inputElement = urlInput.fieldView.element;
           if (inputElement) {
             inputElement.setAttribute('inputmode', 'url');
@@ -326,7 +389,6 @@
               const isBodyFocused = editor.editing.view.document.isFocused;
 
               if (isTitleFocused || isBodyFocused) {
-                scrollWindowTop();
                 window.ReactNativeWebView.postMessage('focus:webView:true');
               }
             }, 1);
