@@ -641,10 +641,20 @@
             if (ui) ui.fire('searchReseted');
           };
 
+          const setPreviewMode = () => {
+            const main = document.querySelector('#main');
+            main.classList.add('preview-mode');
+
+            bodyToolbar.classList.add('hidden');
+
+            document.querySelector("#titleInput").disabled = true;
+            editor.enableReadOnlyMode('preview-mode');
+          };
+
           window.justnote = {
             setThemeMode, setEditorFontSizes, setEditable, setScrollEnabled, scrollTo,
             setTitle, setDir, revokeObjectUrl, clearNoteMedia, addNoteMedia, setBody,
-            getData, setFind, clearFind,
+            getData, setFind, clearFind, setPreviewMode,
           };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
