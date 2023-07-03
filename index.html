@@ -259,21 +259,19 @@
     };
 
     const setToolbarGroupedItemsDropdownMaxWidth = () => {
-      if (!window.editor) return;
-
-      const editor = window.editor;
-      const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
-      if (!groupedItemsDropdown) return;
-
-      if (window.innerWidth < 350) {
-        groupedItemsDropdown.toolbarView.maxWidth = '224px';
-      } else if (window.innerWidth < 428) {
-        groupedItemsDropdown.toolbarView.maxWidth = '256px';
-      } else if (window.innerWidth < 468) {
-        groupedItemsDropdown.toolbarView.maxWidth = '216px';
-      } else {
-        groupedItemsDropdown.toolbarView.maxWidth = '';
+      let toolbarView;
+      try {
+        const editor = window.editor;
+        toolbarView = editor.ui.view.toolbar._behavior.groupedItemsDropdown.toolbarView;
+      } catch (error) {
+        console.log('get toolbarView in groupedItemsDropdown error: ', error);
       }
+      if (!toolbarView) return;
+
+      if (window.innerWidth < 350) toolbarView.maxWidth = '224px';
+      else if (window.innerWidth < 428) toolbarView.maxWidth = '256px';
+      else if (window.innerWidth < 468) toolbarView.maxWidth = '216px';
+      else toolbarView.maxWidth = '';
     };
 
     if (window.visualViewport) {
@@ -293,9 +291,6 @@
         setMainWindowHeight(true);
       });
     }
-    window.addEventListener('resize', throttle(() => {
-      setTimeout(setToolbarGroupedItemsDropdownMaxWidth, 100);
-    }, 16));
 
     const editorConfig = {
       placeholder: 'Start writing...',
@@ -331,6 +326,7 @@
         ],
         columns: 6,
         documentColors: 0,
+        colorPicker: false,
       },
       fontBackgroundColor: {
         colors: [
@@ -349,6 +345,7 @@
         ],
         columns: 6,
         documentColors: 0,
+        colorPicker: false,
       },
       link: {
         addTargetToExternalLinks: true,
@@ -362,10 +359,16 @@
         while (bodyToolbar.firstChild) bodyToolbar.removeChild(bodyToolbar.firstChild);
         bodyToolbar.appendChild(editor.ui.view.toolbar.element);
 
-        const groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+        let groupedItemsDropdown;
+        try {
+          groupedItemsDropdown = editor.ui.view.toolbar._behavior.groupedItemsDropdown;
+        } catch (error) {
+          console.log('get groupedItemsDropdown error: ', error);
+        }
+        const toolbarItems = editor.ui.view.toolbar.items;
+
         if (groupedItemsDropdown) groupedItemsDropdown.panelPosition = 'nw';
 
-        const toolbarItems = editor.ui.view.toolbar.items;
         toolbarItems.get(2).panelPosition = 'nme';
         toolbarItems.get(3).panelPosition = 'nme';
         toolbarItems.get(4).panelPosition = 'nmw';
@@ -377,14 +380,26 @@
           }
         });
 
+        if (groupedItemsDropdown) {
+          groupedItemsDropdown.on('change:isOpen', (evt, name, isOpen) => {
+            if (isOpen) setToolbarGroupedItemsDropdownMaxWidth();
+          });
+        }
+
+        const contextualBalloon = editor.plugins.get('ContextualBalloon');
         const linkUi = editor.plugins.get('LinkUI');
-        if (linkUi) {
-          const urlInput = linkUi.formView.urlInputView;
-          const inputElement = urlInput.fieldView.element;
-          if (inputElement) {
-            inputElement.setAttribute('inputmode', 'url');
-            inputElement.setAttribute('autocapitalize', 'none');
-          }
+        if (contextualBalloon && linkUi) {
+          contextualBalloon.on('change:visibleView', (evt, name, visibleView) => {
+            if (!linkUi.formView || linkUi.formView !== visibleView) return;
+
+            try {
+              const inputElement = linkUi.formView.urlInputView.fieldView.element;
+              inputElement.setAttribute('inputmode', 'url');
+              inputElement.setAttribute('autocapitalize', 'none');
+            } catch (error) {
+              console.log('set attribute on link input error: ', error);
+            }
+          });
         }
 
         if (window.ReactNativeWebView) {
@@ -659,16 +674,35 @@
             editor.enableReadOnlyMode('preview-mode');
           };
 
+          const setVisiblePoweredBy = (visible) => {
+            const wrapper = document.querySelector('.ck-body-wrapper');
+            if (wrapper) {
+              if (visible) wrapper.classList.add('visible-powered-by');
+              else wrapper.classList.remove('visible-powered-by');
+            }
+          };
+
+          const removeVisiblePoweredBy = () => {
+            const wrapper = document.querySelector('.ck-body-wrapper');
+            if (wrapper) {
+              wrapper.classList.remove('visible-powered-by');
+            }
+          };
+
+          const addRemoveVisiblePoweredByListener = () => {
+            editor.model.document.once('change', removeVisiblePoweredBy);
+          };
+
           window.justnote = {
             setThemeMode, setEditorFontSizes, setEditable, setScrollEnabled, scrollTo,
             setTitle, setDir, revokeObjectUrl, clearNoteMedia, addNoteMedia, setBody,
-            getData, setFind, clearFind, setPreviewMode,
+            getData, setFind, clearFind, setPreviewMode, setVisiblePoweredBy,
+            addRemoveVisiblePoweredByListener,
           };
           window.ReactNativeWebView.postMessage('editor:isReady:true');
         }
 
         window.editor = editor;
-        setToolbarGroupedItemsDropdownMaxWidth();
       })
       .catch( error => {
         console.error('There was a problem initializing the editor.', error);
