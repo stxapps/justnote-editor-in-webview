@@ -16,24 +16,58 @@
     .blk-mode #titleInput:disabled {
       -webkit-text-fill-color: rgb(229, 231, 235);
     }
+
+    /* https://www.w3schools.com/howto/howto_css_hide_scrollbars.asp */
+    .hide-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;   /* Chrome, Safari and Opera */
+    }
   </style>
 </head>
 <body class="antialiased overflow-hidden bg-white">
-  <div id="main" class="flex flex-col overflow-hidden">
-    <div id="scrollView" class="flex-grow flex-shrink overflow-x-hidden overflow-y-auto">
-      <div id="titleView" class="px-1.5 py-1.5 border-b border-gray-200">
-        <input type="text" name="titleInput" id="titleInput" class="block w-full border-0 bg-white px-1.5 py-1.5 text-xl font-normal text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-0 lg:text-lg" placeholder="Note Title" />
+  <div id="containView" class="w-full">
+    <div id="main" class="flex flex-col overflow-hidden">
+      <div id="scrollView" class="flex-grow flex-shrink overflow-x-hidden overflow-y-auto">
+        <div id="titleView" class="px-1.5 py-1.5 border-b border-gray-200">
+          <input type="text" name="titleInput" id="titleInput" class="block w-full border-0 bg-white px-1.5 py-1.5 text-xl font-normal text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-0 lg:text-lg" placeholder="Note Title" />
+        </div>
+        <div id="bodyInput"></div>
+        <div id="spaceView"></div>
       </div>
-      <div id="bodyInput"></div>
-      <div id="spaceView"></div>
+      <div id="bodyToolbar" class="flex-grow-0 flex-shrink-0"></div>
     </div>
-    <div id="bodyToolbar" class="flex-grow-0 flex-shrink-0"></div>
+    <div id="overView" class="h-px hidden"></div>
   </div>
   <div id="maskView" class="fixed inset-0 bg-transparent hidden"></div>
   <!-- For Tailwind CSS -->
   <!--   <ul><li><label><input type="checkbox" /></label><span></span></li></ul> -->
   <!-- End -->
   <script>
+    const throttle = (func, limit) => {
+      let lastFunc;
+      let lastRan;
+      return function () {
+        const context = this;
+        const args = arguments;
+        if (!lastRan) {
+          func.apply(context, args);
+          lastRan = Date.now();
+        } else {
+          clearTimeout(lastFunc);
+          lastFunc = setTimeout(function () {
+            if ((Date.now() - lastRan) >= limit) {
+              func.apply(context, args);
+              lastRan = Date.now();
+            }
+          }, limit - (Date.now() - lastRan));
+        }
+      };
+    };
+
     const debounce = (func, wait, immediate) => {
       let timeout;
 
@@ -62,7 +96,10 @@
         return;
       }
 
+      const containView = document.querySelector('#containView');
       const main = document.querySelector('#main');
+
+      containView.style.height = height + 'px';
       main.style.height = height + 'px';
     };
 
@@ -99,6 +136,25 @@
       }, 250);
     };
 
+    const preventScroll = () => {
+      const safeAreaHeight = Math.round(window.visualViewport.height);
+      const windowHeight = Math.round(window.innerHeight);
+
+      const containView = document.querySelector('#containView');
+      const overView = document.querySelector('#overView');
+      if (safeAreaHeight < windowHeight) {
+        containView.classList.add(
+          'overflow-y-scroll', 'overscroll-contain', 'hide-scrollbar',
+        );
+        overView.classList.remove('hidden');
+      } else {
+        containView.classList.remove(
+          'overflow-y-scroll', 'overscroll-contain', 'hide-scrollbar',
+        );
+        overView.classList.add('hidden');
+      }
+    };
+
     const setToolbarGroupedItemsDropdownMaxWidth = () => {
       let toolbarView;
       try {
@@ -120,6 +176,9 @@
       window.visualViewport.addEventListener('resize', () => {
         setMainVisualHeight(true);
       });
+      window.visualViewport.addEventListener('resize', throttle(() => {
+        setTimeout(preventScroll, 100);
+      }, 16));
     } else {
       setMainWindowHeight(true);
       window.addEventListener('resize', () => {

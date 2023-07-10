@@ -954,6 +954,10 @@ select {
   height: 8rem;
 }
 
+.h-px {
+  height: 1px;
+}
+
 .w-full {
   width: 100%;
 }
@@ -992,6 +996,14 @@ select {
 
 .overflow-x-hidden {
   overflow-x: hidden;
+}
+
+.overflow-y-scroll {
+  overflow-y: scroll;
+}
+
+.overscroll-contain {
+  overscroll-behavior: contain;
 }
 
 .border-0 {
