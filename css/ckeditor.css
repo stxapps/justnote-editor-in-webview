@@ -279,7 +279,8 @@
 
 @media (min-width: 1024px) {
   .ck.ck-editor__editable {
-    font-size: 16px;
+    /*On mobile, same font size on all screen sizes.*/
+    /*font-size: 16px;*/
   }
 }
 
