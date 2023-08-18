@@ -30,6 +30,21 @@
     <div id="bodyToolbar" class="flex-grow-0 flex-shrink-0"></div>
   </div>
   <div id="maskView" class="fixed inset-0 bg-transparent hidden"></div>
+  <div id="errorPopup" class="fixed inset-x-0 top-0 flex items-start justify-center hidden">
+    <div class="relative m-4 rounded-md bg-red-50 p-4 shadow-lg">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-6 w-6 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-left text-base font-medium text-red-800">Unable to initialize the editor!</h3>
+          <p class="mt-2.5 text-sm text-red-700">Please kill the app and open it again. We're sorry for the inconvenience. <br class="hidden sm:inline" />If the problem persists, please <a class="rounded underline hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-700" href="https://justnote.cc/#support" target="_blank" rel="noreferrer">contact us</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- For Tailwind CSS -->
   <!--   <ul><li><label><input type="checkbox" /></label><span></span></li></ul> -->
   <!-- End -->
@@ -210,9 +225,7 @@
         toolbarItems.get(5).panelPosition = 'nmw';
         toolbarItems.get(10).on('done', () => {
           if (groupedItemsDropdown) groupedItemsDropdown.set('isOpen', false);
-          if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage('focus:webView:true');
-          }
+          window.ReactNativeWebView.postMessage('focus:webView:true');
         });
 
         if (groupedItemsDropdown) {
@@ -237,310 +250,311 @@
           });
         }
 
-        if (window.ReactNativeWebView) {
-          const SEP = '_jUSTnOTE-sEpArAtOr_';
+        const SEP = '_jUSTnOTE-sEpArAtOr_';
 
-          const onFocusChange = () => {
-            setTimeout(() => {
-              const titleInput = document.querySelector('#titleInput');
-              const isTitleFocused = titleInput === document.activeElement;
-              const isBodyFocused = editor.editing.view.document.isFocused;
-
-              if (isTitleFocused || isBodyFocused) {
-                window.ReactNativeWebView.postMessage('focus:webView:true');
-              }
-            }, 1);
-          };
-          document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
-          editor.editing.view.document.on('change:isFocused', onFocusChange);
-
-          let themeMode = 0, doHighlightTitle = false;
-          const updateTitleInputClassNames = () => {
+        const onFocusChange = () => {
+          setTimeout(() => {
             const titleInput = document.querySelector('#titleInput');
-            if (doHighlightTitle) {
-              titleInput.classList.remove(
-                'bg-white', 'text-gray-800', 'placeholder:text-gray-500',
+            const isTitleFocused = titleInput === document.activeElement;
+            const isBodyFocused = editor.editing.view.document.isFocused;
+
+            if (isTitleFocused || isBodyFocused) {
+              window.ReactNativeWebView.postMessage('focus:webView:true');
+            }
+          }, 1);
+        };
+        document.querySelector('#titleInput').addEventListener('focus', onFocusChange);
+        editor.editing.view.document.on('change:isFocused', onFocusChange);
+
+        let themeMode = 0, doHighlightTitle = false;
+        const updateTitleInputClassNames = () => {
+          const titleInput = document.querySelector('#titleInput');
+          if (doHighlightTitle) {
+            titleInput.classList.remove(
+              'bg-white', 'text-gray-800', 'placeholder:text-gray-500',
+              'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
+            );
+            titleInput.classList.add(
+              'bg-yellow-300', 'text-gray-800', 'placeholder:text-gray-500'
+            );
+          } else {
+            titleInput.classList.remove(
+              'bg-yellow-300', 'text-gray-800', 'placeholder:text-gray-500'
+            );
+            titleInput.classList.add(
+              'bg-white', 'text-gray-800', 'placeholder:text-gray-500'
+            );
+            if (themeMode === 1) {
+              titleInput.classList.add(
                 'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
               );
-              titleInput.classList.add(
-                'bg-yellow-300', 'text-gray-800', 'placeholder:text-gray-500'
-              );
             } else {
               titleInput.classList.remove(
-                'bg-yellow-300', 'text-gray-800', 'placeholder:text-gray-500'
+                'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
               );
-              titleInput.classList.add(
-                'bg-white', 'text-gray-800', 'placeholder:text-gray-500'
-              );
-              if (themeMode === 1) {
-                titleInput.classList.add(
-                  'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
-                );
-              } else {
-                titleInput.classList.remove(
-                  'blk:bg-gray-900', 'blk:text-gray-200', 'blk:placeholder:text-gray-400'
-                );
-              }
             }
-          };
+          }
+        };
 
-          const setThemeMode = (mode) => {
-            const body = document.querySelector('body');
-            if (mode === 1) body.classList.add('blk:bg-gray-900');
-            else body.classList.remove('blk:bg-gray-900');
+        const setThemeMode = (mode) => {
+          const body = document.querySelector('body');
+          if (mode === 1) body.classList.add('blk:bg-gray-900');
+          else body.classList.remove('blk:bg-gray-900');
 
-            const main = document.querySelector('#main');
-            if (mode === 0) main.classList.add('wht-mode');
-            else main.classList.remove('wht-mode');
+          const main = document.querySelector('#main');
+          if (mode === 0) main.classList.add('wht-mode');
+          else main.classList.remove('wht-mode');
 
-            if (mode === 1) main.classList.add('blk-mode');
-            else main.classList.remove('blk-mode');
+          if (mode === 1) main.classList.add('blk-mode');
+          else main.classList.remove('blk-mode');
 
-            const titleView = document.querySelector('#titleView');
-            if (mode === 1) titleView.classList.add('blk:border-gray-700');
-            else titleView.classList.remove('blk:border-gray-700');
+          const titleView = document.querySelector('#titleView');
+          if (mode === 1) titleView.classList.add('blk:border-gray-700');
+          else titleView.classList.remove('blk:border-gray-700');
 
-            const wrapper = document.querySelector('.ck-body-wrapper');
-            if (wrapper) {
-              if (mode === 0) wrapper.classList.add('wht-mode');
-              else wrapper.classList.remove('wht-mode');
+          const wrapper = document.querySelector('.ck-body-wrapper');
+          if (wrapper) {
+            if (mode === 0) wrapper.classList.add('wht-mode');
+            else wrapper.classList.remove('wht-mode');
 
-              if (mode === 1) wrapper.classList.add('blk-mode');
-              else wrapper.classList.remove('blk-mode');
-            }
+            if (mode === 1) wrapper.classList.add('blk-mode');
+            else wrapper.classList.remove('blk-mode');
+          }
 
-            themeMode = mode;
-            updateTitleInputClassNames();
-          };
-          // semi-collon to end a function is important for export-ckeditor-as-string.js
+          themeMode = mode;
+          updateTitleInputClassNames();
+        };
+        // semi-collon to end a function is important for export-ckeditor-as-string.js
 
-          const setEditorFontSizes = (doMoreEditorFontSizes) => {
-            const main = document.querySelector('#main');
-            if (doMoreEditorFontSizes) {
-              main.classList.add('more-font-sizes');
-              main.classList.remove('default-font-sizes');
-            } else {
-              main.classList.add('default-font-sizes');
-              main.classList.remove('more-font-sizes');
-            }
+        const setEditorFontSizes = (doMoreEditorFontSizes) => {
+          const main = document.querySelector('#main');
+          if (doMoreEditorFontSizes) {
+            main.classList.add('more-font-sizes');
+            main.classList.remove('default-font-sizes');
+          } else {
+            main.classList.add('default-font-sizes');
+            main.classList.remove('more-font-sizes');
+          }
 
-            const spaceView = document.querySelector('#spaceView');
-            if (doMoreEditorFontSizes) {
-              spaceView.classList.add('h-32');
-              spaceView.classList.remove('h-28');
-            } else {
-              spaceView.classList.add('h-28');
-              spaceView.classList.remove('h-32');
-            }
-          };
+          const spaceView = document.querySelector('#spaceView');
+          if (doMoreEditorFontSizes) {
+            spaceView.classList.add('h-32');
+            spaceView.classList.remove('h-28');
+          } else {
+            spaceView.classList.add('h-28');
+            spaceView.classList.remove('h-32');
+          }
+        };
 
-          const setEditable = (editable) => {
-            const maskView = document.querySelector('#maskView');
-            maskView.style.display = editable ? 'none' : 'block';
-          };
+        const setEditable = (editable) => {
+          const maskView = document.querySelector('#maskView');
+          maskView.style.display = editable ? 'none' : 'block';
+        };
 
-          const setScrollEnabled = (enabled) => {
-            const scrollView = document.querySelector('#scrollView');
-            scrollView.style.overflowY = enabled ? null : 'hidden';
-          };
+        const setScrollEnabled = (enabled) => {
+          const scrollView = document.querySelector('#scrollView');
+          scrollView.style.overflowY = enabled ? null : 'hidden';
+        };
 
-          const scrollTo = (x, y) => {
-            const scrollView = document.querySelector('#scrollView');
-            scrollView.scrollTo(x, y);
-          };
+        const scrollTo = (x, y) => {
+          const scrollView = document.querySelector('#scrollView');
+          scrollView.scrollTo(x, y);
+        };
 
-          const setTitle = (title) => {
-            document.querySelector('#titleInput').value = title;
-          };
+        const setTitle = (title) => {
+          document.querySelector('#titleInput').value = title;
+        };
 
-          let dir;
+        let dir;
 
-          const setDir = (_dir) => {
-            dir = _dir
-          };
+        const setDir = (_dir) => {
+          dir = _dir
+        };
 
-          const revokeObjectUrl = (objectUrl) => {
+        const revokeObjectUrl = (objectUrl) => {
+          URL.revokeObjectURL(objectUrl);
+        };
+
+        let noteMedia = [];
+        let objectUrlContents = {};
+        let objectUrlNames = {};
+
+        const clearNoteMedia = () => {
+          noteMedia = [];
+
+          for (const objectUrl in objectUrlContents) {
             URL.revokeObjectURL(objectUrl);
-          };
+          }
+          objectUrlContents = {};
 
-          let noteMedia = [];
-          let objectUrlContents = {};
-          let objectUrlNames = {};
+          objectUrlNames = {};
+        };
 
-          const clearNoteMedia = () => {
-            noteMedia = [];
+        const addNoteMedia = (name, content) => {
+          noteMedia.push({ name, content });
+        };
 
-            for (const objectUrl in objectUrlContents) {
-              URL.revokeObjectURL(objectUrl);
-            }
-            objectUrlContents = {};
+        const isString = (val) => {
+          return typeof val === 'string' || val instanceof String;
+        };
 
-            objectUrlNames = {};
-          };
+        const dataUrlToBlob = async (content) => {
+          const res = await fetch(content);
+          const blob = await res.blob();
+          return blob;
+        };
 
-          const addNoteMedia = (name, content) => {
-            noteMedia.push({ name, content });
-          };
+        const replaceWithContents = async (body) => {
+          const _media = noteMedia.filter(({ content }) => {
+            return isString(content) && content.startsWith('data:');
+          });
+          const media = await Promise.all(_media.map(async ({ name, content }) => {
+            const blob = await dataUrlToBlob(content);
+            return { name, content, blob };
+          }));
 
-          const isString = (val) => {
-            return typeof val === 'string' || val instanceof String;
-          };
+          for (const { name, content, blob } of media) {
+            const objectUrl = URL.createObjectURL(blob);
 
-          const dataUrlToBlob = async (content) => {
-            const res = await fetch(content);
-            const blob = await res.blob();
-            return blob;
-          };
+            objectUrlContents[objectUrl] = { fname: name, content };
+            objectUrlNames[objectUrl] = name;
 
-          const replaceWithContents = async (body) => {
-            const _media = noteMedia.filter(({ content }) => {
-              return isString(content) && content.startsWith('data:');
-            });
-            const media = await Promise.all(_media.map(async ({ name, content }) => {
-              const blob = await dataUrlToBlob(content);
-              return { name, content, blob };
-            }));
+            body = body.replaceAll(name, objectUrl);
+          }
 
-            for (const { name, content, blob } of media) {
-              const objectUrl = URL.createObjectURL(blob);
+          return body;
+        };
 
-              objectUrlContents[objectUrl] = { fname: name, content };
-              objectUrlNames[objectUrl] = name;
+        const replaceWithFiles = (body) => {
+          const media = noteMedia.filter(({ name }) => {
+            return isString(name) && name.startsWith('cdroot/');
+          });
+          for (const { name, content } of media) {
+            const fileUrl = name.replace('cdroot/', 'file://' + dir + '/');
 
-              body = body.replaceAll(name, objectUrl);
-            }
-
-            return body;
-          };
-
-          const replaceWithFiles = (body) => {
-            const media = noteMedia.filter(({ name }) => {
-              return isString(name) && name.startsWith('cdroot/');
-            });
-            for (const { name, content } of media) {
-              const fileUrl = name.replace('cdroot/', 'file://' + dir + '/');
-
-              window.ReactNativeWebView.postMessage(
-                'include:objectUrlFiles:' + fileUrl + SEP + name + SEP + content
-              );
-              objectUrlNames[fileUrl] = name;
-
-              body = body.replaceAll(name, fileUrl);
-            }
-
-            return body;
-          };
-
-          const setBody = async (body) => {
-            body = await replaceWithContents(body);
-            body = replaceWithFiles(body);
-            editor.setData(body);
-          };
-
-          const getData = () => {
-            window.ReactNativeWebView.postMessage('clear:objectUrlContents:true');
-            for (const [k, v] of Object.entries(objectUrlContents)) {
-              window.ReactNativeWebView.postMessage(
-                'add:objectUrlContents:' + k + SEP + v.fname + SEP + v.content
-              );
-            }
-
-            window.ReactNativeWebView.postMessage('clear:objectUrlNames:true');
-            for (const [k, v] of Object.entries(objectUrlNames)) {
-              window.ReactNativeWebView.postMessage(
-                'add:objectUrlNames:' + k + SEP + v
-              );
-            }
-
-            const title = document.querySelector('#titleInput').value.trimEnd();
-            const body = editor.getData();
-            window.ReactNativeWebView.postMessage('data:webView:' + title + SEP + body);
-          };
-
-          // Need debounce for now to prevent calling editor.getData too often
-          // There is still performance issue about that.
-          // https://github.com/ckeditor/ckeditor5/issues/5812
-          const onDataChange = debounce(() => {
-            window.ReactNativeWebView.postMessage('clear:editingObjectUrlContents:true');
-            for (const [k, v] of Object.entries(objectUrlContents)) {
-              window.ReactNativeWebView.postMessage(
-                'add:editingObjectUrlContents:' + k + SEP + v.fname + SEP + v.content
-              );
-            }
-
-            window.ReactNativeWebView.postMessage('clear:editingObjectUrlNames:true');
-            for (const [k, v] of Object.entries(objectUrlNames)) {
-              window.ReactNativeWebView.postMessage(
-                'add:editingObjectUrlNames:' + k + SEP + v
-              );
-            }
-
-            const title = document.querySelector('#titleInput').value.trimEnd();
-            const body = editor.getData();
             window.ReactNativeWebView.postMessage(
-              'editingData:webView:' + title + SEP + body
+              'include:objectUrlFiles:' + fileUrl + SEP + name + SEP + content
             );
-          }, 1000);
-          document.querySelector('#titleInput').addEventListener('input', onDataChange);
-          editor.model.document.on('change:data', onDataChange);
+            objectUrlNames[fileUrl] = name;
 
-          const setFind = (doHighlight, searchString, matchCase) => {
-            doHighlightTitle = doHighlight;
-            updateTitleInputClassNames();
+            body = body.replaceAll(name, fileUrl);
+          }
 
-            editor.execute('find', searchString, { matchCase });
-          };
+          return body;
+        };
 
-          const clearFind = () => {
-            doHighlightTitle = false;
-            updateTitleInputClassNames();
+        const setBody = async (body) => {
+          body = await replaceWithContents(body);
+          body = replaceWithFiles(body);
+          editor.setData(body);
+        };
 
-            const ui = editor.plugins.get('FindAndReplaceUI');
-            if (ui) ui.fire('searchReseted');
-          };
+        const getData = () => {
+          window.ReactNativeWebView.postMessage('clear:objectUrlContents:true');
+          for (const [k, v] of Object.entries(objectUrlContents)) {
+            window.ReactNativeWebView.postMessage(
+              'add:objectUrlContents:' + k + SEP + v.fname + SEP + v.content
+            );
+          }
 
-          const setPreviewMode = () => {
-            const main = document.querySelector('#main');
-            main.classList.add('preview-mode');
+          window.ReactNativeWebView.postMessage('clear:objectUrlNames:true');
+          for (const [k, v] of Object.entries(objectUrlNames)) {
+            window.ReactNativeWebView.postMessage(
+              'add:objectUrlNames:' + k + SEP + v
+            );
+          }
 
-            bodyToolbar.classList.add('hidden');
+          const title = document.querySelector('#titleInput').value.trimEnd();
+          const body = editor.getData();
+          window.ReactNativeWebView.postMessage('data:webView:' + title + SEP + body);
+        };
 
-            document.querySelector("#titleInput").disabled = true;
-            editor.enableReadOnlyMode('preview-mode');
-          };
+        // Need debounce for now to prevent calling editor.getData too often
+        // There is still performance issue about that.
+        // https://github.com/ckeditor/ckeditor5/issues/5812
+        const onDataChange = debounce(() => {
+          window.ReactNativeWebView.postMessage('clear:editingObjectUrlContents:true');
+          for (const [k, v] of Object.entries(objectUrlContents)) {
+            window.ReactNativeWebView.postMessage(
+              'add:editingObjectUrlContents:' + k + SEP + v.fname + SEP + v.content
+            );
+          }
 
-          const setVisiblePoweredBy = (visible) => {
-            const wrapper = document.querySelector('.ck-body-wrapper');
-            if (wrapper) {
-              if (visible) wrapper.classList.add('visible-powered-by');
-              else wrapper.classList.remove('visible-powered-by');
-            }
-          };
+          window.ReactNativeWebView.postMessage('clear:editingObjectUrlNames:true');
+          for (const [k, v] of Object.entries(objectUrlNames)) {
+            window.ReactNativeWebView.postMessage(
+              'add:editingObjectUrlNames:' + k + SEP + v
+            );
+          }
 
-          const removeVisiblePoweredBy = () => {
-            const wrapper = document.querySelector('.ck-body-wrapper');
-            if (wrapper) {
-              wrapper.classList.remove('visible-powered-by');
-            }
-          };
+          const title = document.querySelector('#titleInput').value.trimEnd();
+          const body = editor.getData();
+          window.ReactNativeWebView.postMessage(
+            'editingData:webView:' + title + SEP + body
+          );
+        }, 1000);
+        document.querySelector('#titleInput').addEventListener('input', onDataChange);
+        editor.model.document.on('change:data', onDataChange);
 
-          const addRemoveVisiblePoweredByListener = () => {
-            editor.model.document.once('change', removeVisiblePoweredBy);
-          };
+        const setFind = (doHighlight, searchString, matchCase) => {
+          doHighlightTitle = doHighlight;
+          updateTitleInputClassNames();
 
-          window.justnote = {
-            setThemeMode, setEditorFontSizes, setEditable, setScrollEnabled, scrollTo,
-            setTitle, setDir, revokeObjectUrl, clearNoteMedia, addNoteMedia, setBody,
-            getData, setFind, clearFind, setPreviewMode, setVisiblePoweredBy,
-            addRemoveVisiblePoweredByListener,
-          };
-          window.ReactNativeWebView.postMessage('editor:isReady:true');
-        }
+          editor.execute('find', searchString, { matchCase });
+        };
+
+        const clearFind = () => {
+          doHighlightTitle = false;
+          updateTitleInputClassNames();
+
+          const ui = editor.plugins.get('FindAndReplaceUI');
+          if (ui) ui.fire('searchReseted');
+        };
+
+        const setPreviewMode = () => {
+          const main = document.querySelector('#main');
+          main.classList.add('preview-mode');
+
+          bodyToolbar.classList.add('hidden');
+
+          document.querySelector("#titleInput").disabled = true;
+          editor.enableReadOnlyMode('preview-mode');
+        };
+
+        const setVisiblePoweredBy = (visible) => {
+          const wrapper = document.querySelector('.ck-body-wrapper');
+          if (wrapper) {
+            if (visible) wrapper.classList.add('visible-powered-by');
+            else wrapper.classList.remove('visible-powered-by');
+          }
+        };
+
+        const removeVisiblePoweredBy = () => {
+          const wrapper = document.querySelector('.ck-body-wrapper');
+          if (wrapper) {
+            wrapper.classList.remove('visible-powered-by');
+          }
+        };
+
+        const addRemoveVisiblePoweredByListener = () => {
+          editor.model.document.once('change', removeVisiblePoweredBy);
+        };
+
+        window.justnote = {
+          setThemeMode, setEditorFontSizes, setEditable, setScrollEnabled, scrollTo,
+          setTitle, setDir, revokeObjectUrl, clearNoteMedia, addNoteMedia, setBody,
+          getData, setFind, clearFind, setPreviewMode, setVisiblePoweredBy,
+          addRemoveVisiblePoweredByListener,
+        };
+        window.ReactNativeWebView.postMessage('editor:isReady:true');
 
         window.editor = editor;
       })
       .catch( error => {
         console.error('There was a problem initializing the editor.', error);
+
+        const errorPopup = document.querySelector('#errorPopup');
+        errorPopup.classList.remove('hidden');
       });
   </script>
 </body>
