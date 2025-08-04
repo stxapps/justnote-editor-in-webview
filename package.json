@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "copy-ckeditor": "rm -rf ./js/* && cp -r ../ckeditor5/packages/ckeditor5-build-decoupled-document/build/* ./js",
+    "copy-ckeditor": "rm -rf ./js/* && cp ../justnote-editor/build/ckeditor.js ./js",
     "build-css": "npx tailwindcss -c tailwind.config.js -i tailwind.css -o css/tailwind.css",
     "start": "live-server --ignore=node_modules,.git --no-browser"
   },
